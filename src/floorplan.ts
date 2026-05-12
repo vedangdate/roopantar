@@ -56,11 +56,24 @@ export const WALLS: WallSeg[] = [
   // East wall (separating from Living open hall): door gap z=2.4..3.2
   { x1: 2.4, z1: 2.0, x2: 2.4, z2: 2.4 },
   { x1: 2.4, z1: 3.2, x2: 2.4, z2: 5.8 },
-  // North wall (separating from NW en-suite toilet)
-  { x1: 0,   z1: 5.8, x2: 2.4, z2: 5.8 },
+  // North wall (separating from NW en-suite toilet) — door gap x=0.8..1.6
+  { x1: 0,   z1: 5.8, x2: 0.8, z2: 5.8 },
+  { x1: 1.6, z1: 5.8, x2: 2.4, z2: 5.8 },
 
-  // ---- NW Toilet (en-suite for NW bedroom) ----
-  // x=0..2.4, z=5.8..7.6 (1.8m deep). No door modelled (decorative for v0).
+  // ---- NW Toilet (en-suite for NW bedroom, the 5'1"×7'10" one that
+  // sits at the boundary with flat 803, NOT the one bordering the big
+  // living-room deck — that one belongs to 803).
+  // x=0..2.4 (full west width of our portion), z=5.8..7.4 (1.6m deep).
+  // East wall (separates toilet from Living open hall):
+  { x1: 2.4, z1: 5.8, x2: 2.4, z2: 7.4 },
+  // North wall (separates toilet from what's beyond — i.e. flat 803's
+  // toilet north of us, or the deck-west strip):
+  { x1: 0,   z1: 7.4, x2: 2.4, z2: 7.4 },
+
+  // ---- Kitchen west wall (separates kitchen from the strip west of
+  // it that's bounded by the NW toilet on the south and the deck on
+  // the north — keeps the player out of that dead zone) ----
+  { x1: 2.4, z1: 7.4, x2: 2.4, z2: 10.5 },
 
   // ---- Living / Dining (one big open hall) ----
   // Living+Dining is a single L-shaped hall: from x=2.4..10 z=0..7,
@@ -121,6 +134,7 @@ export interface RoomLabel {
 export const ROOMS: RoomLabel[] = [
   { name: 'Lobby',           cx: 3.4,  cz: 1.0 },
   { name: 'NW Bedroom',      cx: 1.2,  cz: 3.5 },
+  { name: 'NW Toilet',       cx: 1.2,  cz: 6.6 },
   { name: 'Living',          cx: 7.0,  cz: 4.5 },
   { name: 'Dining',          cx: 7.0,  cz: 1.5 },
   { name: 'Kitchen',         cx: 4.5,  cz: 8.7 },
@@ -186,6 +200,10 @@ export const FURNITURE: FurnitureItem[] = [
 
   // ===== North Deck plant =====
   { name: 'plant',            room: 'North Deck', x: 9.0, z: 11.3, width: 0.5, depth: 0.5, height: 1.4, color: [0.25, 0.50, 0.25] },
+
+  // ===== NW Toilet (small en-suite) =====
+  { name: 'wc',               room: 'NW Toilet', x: 0.4, z: 7.0, width: 0.45, depth: 0.6, height: 0.42, color: [0.92, 0.92, 0.92] },
+  { name: 'vanity',           room: 'NW Toilet', x: 1.9, z: 6.1, width: 0.4, depth: 0.6, height: 0.85, color: [0.85, 0.78, 0.68] },
 ];
 
 // Spawn just inside the front door, facing north into the flat.
