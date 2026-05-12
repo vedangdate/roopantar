@@ -59,9 +59,8 @@ export interface WallSeg {
 
 export const WALLS: WallSeg[] = [
   // ====== Exterior perimeter ======
-  // South wall (front) — front door gap x=5.5..6.5
-  { x1: 0,     z1: 0, x2: 5.5,   z2: 0 },
-  { x1: 6.5,   z1: 0, x2: FLAT_WIDTH, z2: 0 },
+  // South wall — solid (front door is on the WEST wall of the lobby, not here).
+  { x1: 0, z1: 0, x2: FLAT_WIDTH, z2: 0 },
   // East wall (varies by section due to master deck and NE deck step)
   { x1: FLAT_WIDTH, z1: 0,     x2: FLAT_WIDTH, z2: 4.34 },   // master deck east
   { x1: 14.61, z1: 4.34, x2: FLAT_WIDTH, z2: 4.34 },         // north edge of master deck
@@ -79,7 +78,8 @@ export const WALLS: WallSeg[] = [
   // ====== Internal walls ======
 
   // ---- Lobby (entrance, x=4.83..7.27, z=0..1.42) ----
-  // West wall (separates Lobby from NW Bedroom): door gap z=0.4..1.1
+  // West wall = THE FRONT DOOR. Opening leads west to the central building
+  // passage (outside flat 004). Door gap z=0.4..1.1.
   { x1: 4.83, z1: 0,   x2: 4.83, z2: 0.4 },
   { x1: 4.83, z1: 1.1, x2: 4.83, z2: 1.42 },
   // North wall (separates Lobby from Dining): door gap x=5.6..6.4
@@ -366,10 +366,12 @@ export const FURNITURE: FurnitureItem[] = [
   { name: 'window Living-north', room: 'Living', x: 6.5, z: 10.34, width: 1.5, depth: 0.06, height: 1.0, y: 1.0, color: [0.62, 0.82, 0.95] },
 ];
 
-// Spawn just inside the front door, facing north into the flat.
+// Spawn just inside the front door (front door is on the WEST wall of the
+// Lobby at z=0.4..1.1). Player stands inside the Lobby facing EAST, deeper
+// into the flat (so the door is behind them).
 export const SPAWN = {
-  x: 6.05,
-  z: 0.7,
-  y: 1.7,
-  rotY: 0,
+  x: 5.5,   // ~0.7 m east of the front-door gap
+  z: 0.7,   // centred in Lobby's N-S extent (lobby z=0..1.42)
+  y: 1.7,   // eye height
+  rotY: -Math.PI / 2,  // face east (+x direction = deeper into the flat)
 };
