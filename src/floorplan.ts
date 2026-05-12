@@ -1,127 +1,197 @@
-// Floor plan for v0 — a plausible 2BHK Indian apartment.
-// All units in metres. Origin (0,0) at the SW corner of the flat.
-// X = east, Z = north, Y = up.
+// Floor plan — flat 804, Erandwane Central. Vedang's actual home.
+// 4BHK:
+//   - 1 bedroom attached to Living + Lobby (NW corner of the flat)
+//   - 3 bedrooms in a single line along the east wall (NE → Middle → Master, north-to-south)
+// + Kitchen and Utility on the north side, big deck along the north exterior,
+//   smaller decks on the east side (off NE bedroom and off master).
 //
-// This is a placeholder layout. Vedang's actual flat (204 Woodland
-// Harmony) layout can replace this once we figure out an import format
-// (DXF / phone-AR scan / hand-drawn editor).
+// Source: ~/Library/CloudStorage/OneDrive-Personal/Documents/Family/
+//         sthaavar maalmatta - jameen/erandwane central/interior/Modified 804.jpg
+//
+// All units in metres. Origin (0,0) is at the SW corner of the flat.
+// X = east, Z = north, Y = up. Dimensions are approximate (sketched from a
+// photo of the printed plan); topology is correct but exact widths can be
+// fine-tuned later.
 
-export const FLAT_WIDTH = 12; // east-west
-export const FLAT_DEPTH = 9; // north-south
+export const FLAT_WIDTH = 14;   // east-west
+export const FLAT_DEPTH = 12;   // north-south
 export const CEILING_HEIGHT = 3.0;
 export const WALL_THICKNESS = 0.15;
 
-// Wall is a line segment from (x1,z1) to (x2,z2). All wall meshes will
-// be extruded vertically by CEILING_HEIGHT.
 export interface WallSeg {
   x1: number; z1: number;
   x2: number; z2: number;
 }
 
-// External perimeter has a 1-metre gap on the south wall for the entrance.
-// Internal walls divide the flat into rooms.
+// Wall segments. Each is a horizontal or vertical line on the XZ plane;
+// the renderer extrudes them vertically by CEILING_HEIGHT. Doorways are
+// expressed by leaving a gap in the wall.
 export const WALLS: WallSeg[] = [
-  // === External perimeter (south wall is in two pieces, entrance gap from x=10 to x=11.5) ===
-  { x1: 0, z1: 0, x2: 10, z2: 0 },
-  { x1: 11.5, z1: 0, x2: FLAT_WIDTH, z2: 0 },
-  { x1: FLAT_WIDTH, z1: 0, x2: FLAT_WIDTH, z2: FLAT_DEPTH }, // east
-  { x1: 0, z1: FLAT_DEPTH, x2: FLAT_WIDTH, z2: FLAT_DEPTH }, // north
-  { x1: 0, z1: 0, x2: 0, z2: FLAT_DEPTH }, // west
+  // ====== Exterior perimeter ======
+  // South wall (front of flat) — has a doorway gap (entrance) from x=3.0 to x=4.2
+  { x1: 0,   z1: 0,   x2: 3.0, z2: 0 },
+  { x1: 4.2, z1: 0,   x2: FLAT_WIDTH, z2: 0 },
+  // East wall (with notched east deck at SE)
+  { x1: FLAT_WIDTH, z1: 0, x2: FLAT_WIDTH, z2: FLAT_DEPTH },
+  // North wall
+  { x1: 0, z1: FLAT_DEPTH, x2: FLAT_WIDTH, z2: FLAT_DEPTH },
+  // West wall
+  { x1: 0, z1: 0, x2: 0, z2: FLAT_DEPTH },
 
-  // === Internal walls ===
-  // Living room / kitchen separator (with a doorway from x=2 to x=3)
-  { x1: 0, z1: 5, x2: 2, z2: 5 },
-  { x1: 3, z1: 5, x2: 5, z2: 5 },
+  // ====== Internal walls ======
 
-  // Hallway / bedroom separators
-  { x1: 5, z1: 0, x2: 5, z2: 2 }, // partial wall south of hallway
-  { x1: 5, z1: 3, x2: 5, z2: 5 }, // doorway gap between 2..3
+  // ---- Lobby (entrance foyer, just inside the front door) ----
+  // Lobby occupies x=2.4..4.5, z=0..2.0. Door gap on its south face (entrance).
+  // East wall of Lobby (separating Lobby from Living): door gap z=0.8..1.6
+  { x1: 4.5, z1: 0,   x2: 4.5, z2: 0.8 },
+  { x1: 4.5, z1: 1.6, x2: 4.5, z2: 2.0 },
+  // West wall of Lobby (separating Lobby from NW Bedroom): door gap z=0.6..1.4
+  { x1: 2.4, z1: 0,   x2: 2.4, z2: 0.6 },
+  { x1: 2.4, z1: 1.4, x2: 2.4, z2: 2.0 },
+  // North wall of Lobby (separating Lobby from Living open hall)
+  { x1: 2.4, z1: 2.0, x2: 4.5, z2: 2.0 },
 
-  // Living room east wall (with door at z=3.5 to z=4.5 into master bedroom area)
-  // Actually rethinking: hallway runs east-west through middle...
-  // Let me simplify the layout to be more obvious:
-  // SW: Living room (large)         NW: Kitchen
-  // S center: Foyer/hallway          N center: Master bedroom
-  // SE: Second bedroom               NE: Bathroom (separating two bedrooms)
-  // Use only the walls listed above and add the master bedroom + bath partitions.
+  // ---- NW Bedroom (the one attached to Lobby + Living) ----
+  // NW Bedroom: x=0..2.4, z=0..5.8. Door from Lobby on east wall (above).
+  // East wall (separating from Living open hall): door gap z=2.4..3.2
+  { x1: 2.4, z1: 2.0, x2: 2.4, z2: 2.4 },
+  { x1: 2.4, z1: 3.2, x2: 2.4, z2: 5.8 },
+  // North wall (separating from NW en-suite toilet)
+  { x1: 0,   z1: 5.8, x2: 2.4, z2: 5.8 },
 
-  // Master bedroom south wall (z=5 boundary, partial — already covered above)
-  // Add east boundary of master bedroom:
-  { x1: 9, z1: 5, x2: 9, z2: 7 },
-  { x1: 9, z1: 8, x2: 9, z2: FLAT_DEPTH },
+  // ---- NW Toilet (en-suite for NW bedroom) ----
+  // x=0..2.4, z=5.8..7.6 (1.8m deep). No door modelled (decorative for v0).
 
-  // Bathroom partition (north-east) - between master and a small bath corner
-  { x1: 9, z1: 7, x2: FLAT_WIDTH, z2: 7 }, // bath south wall
-  // Bath has its own door on east wall (effectively from corridor at x=9, z=7..8 is doorway gap)
+  // ---- Living / Dining (one big open hall) ----
+  // Living+Dining is a single L-shaped hall: from x=2.4..10 z=0..7,
+  // plus a strip x=4.5..10 z=0..2.0 connecting Lobby. Walls below
+  // separate it from kitchen (north) and east bedrooms (east).
 
-  // Master bedroom interior wall to corridor (already from south wall above)
-  // Second bedroom / corridor: south of z=5 east of x=5
-  { x1: 5, z1: 0, x2: 9, z2: 0 }, // already part of south perimeter — skip
-  // Second bedroom east wall:
-  { x1: 9, z1: 0, x2: 9, z2: 4 },
-  // Second bedroom north wall (separating from master):
-  { x1: 5, z1: 4, x2: 8, z2: 4 },
+  // Living north wall (separating from Kitchen): door gap x=6.0..7.0
+  { x1: 2.4, z1: 7.0, x2: 6.0, z2: 7.0 },
+  { x1: 7.0, z1: 7.0, x2: 10,  z2: 7.0 },
+
+  // Living/Dining east wall (separating from east bedrooms, 3 doors total):
+  // Master door: z=1.6..2.4
+  // Middle door: z=4.0..4.8
+  // NE door:     z=8.6..9.4
+  { x1: 10, z1: 0,   x2: 10, z2: 1.6 },
+  { x1: 10, z1: 2.4, x2: 10, z2: 4.0 },
+  { x1: 10, z1: 4.8, x2: 10, z2: 8.6 },
+  { x1: 10, z1: 9.4, x2: 10, z2: FLAT_DEPTH },
+
+  // ---- Kitchen + Utility (north of Living, west portion) ----
+  // Kitchen: x=2.4..6.5, z=7.0..10.5 (3.5m × 3.5m).
+  // Kitchen east wall (separating from a small toilet between kitchen and NE bedroom):
+  { x1: 6.5, z1: 7.0, x2: 6.5, z2: 10.5 },
+  // Kitchen north wall (separating from north deck): door gap x=3.5..4.5
+  { x1: 2.4, z1: 10.5, x2: 3.5, z2: 10.5 },
+  { x1: 4.5, z1: 10.5, x2: 6.5, z2: 10.5 },
+
+  // ---- Toilet between Kitchen and NE bedroom (the 6'0"x9'0" one) ----
+  // x=6.5..7.6, z=7.0..10.0
+  { x1: 7.6, z1: 7.0,  x2: 7.6, z2: 10.0 },
+  { x1: 6.5, z1: 10.0, x2: 7.6, z2: 10.0 },
+
+  // ---- Utility (between toilet and NE bedroom) ----
+  // x=7.6..10, z=9.5..10.5 (small utility area)
+  { x1: 7.6, z1: 9.5, x2: 10, z2: 9.5 },
+
+  // ---- North Deck ----
+  // x=2.4..10, z=10.5..FLAT_DEPTH (1.5m deep). No walls between deck and exterior —
+  // perimeter is the building exterior on north.
+
+  // ---- East bedrooms (3 in a line) ----
+  // NE Bedroom: x=10..FLAT_WIDTH, z=8.0..FLAT_DEPTH (4m × 4m)
+  //   East deck (small) on its east side via wall gap. For v0, no deck door.
+  // Middle Bedroom: x=10..FLAT_WIDTH, z=4.0..8.0 (4m × 4m)
+  // Master Bedroom: x=10..FLAT_WIDTH, z=0..4.0 (4m × 4m)
+
+  // Wall between Master and Middle (z=4):
+  { x1: 10, z1: 4.0, x2: FLAT_WIDTH, z2: 4.0 },
+  // Wall between Middle and NE (z=8):
+  { x1: 10, z1: 8.0, x2: FLAT_WIDTH, z2: 8.0 },
 ];
 
-// Door openings — purely cosmetic markers for v0 (we already left gaps in WALLS above).
-// In future these can render door frames or animated doors.
 export interface RoomLabel {
   name: string;
-  cx: number; cz: number; // centre point for label / spawn logic
+  cx: number; cz: number;
 }
 
 export const ROOMS: RoomLabel[] = [
-  { name: 'Living Room', cx: 2.5, cz: 2.5 },
-  { name: 'Kitchen', cx: 2.5, cz: 7 },
-  { name: 'Hallway', cx: 7, cz: 4.5 },
-  { name: 'Bedroom', cx: 7, cz: 2 },
-  { name: 'Master Bedroom', cx: 11, cz: 6 },
-  { name: 'Bathroom', cx: 11, cz: 8 },
+  { name: 'Lobby',           cx: 3.4,  cz: 1.0 },
+  { name: 'NW Bedroom',      cx: 1.2,  cz: 3.5 },
+  { name: 'Living',          cx: 7.0,  cz: 4.5 },
+  { name: 'Dining',          cx: 7.0,  cz: 1.5 },
+  { name: 'Kitchen',         cx: 4.5,  cz: 8.7 },
+  { name: 'North Deck',      cx: 5.5,  cz: 11.2 },
+  { name: 'Master Bedroom',  cx: 12,   cz: 2.0 },
+  { name: 'Middle Bedroom',  cx: 12,   cz: 6.0 },
+  { name: 'NE Bedroom',      cx: 12,   cz: 10  },
 ];
 
-// Furniture as simple primitives for v0. Each is a box at given centre & size.
 export interface FurnitureItem {
   name: string;
   room: string;
-  x: number; z: number; // centre
+  x: number; z: number;
   width: number; depth: number; height: number;
-  y?: number; // height above floor (for tables etc); default 0
-  color: [number, number, number]; // RGB 0..1
+  y?: number;
+  color: [number, number, number];
   rotY?: number;
 }
 
 export const FURNITURE: FurnitureItem[] = [
-  // Living room
-  { name: 'sofa', room: 'Living Room', x: 1, z: 1.2, width: 2.0, depth: 0.85, height: 0.8, color: [0.55, 0.25, 0.18] },
-  { name: 'coffee table', room: 'Living Room', x: 1, z: 2.8, width: 1.0, depth: 0.5, height: 0.45, color: [0.42, 0.27, 0.18] },
-  { name: 'tv unit', room: 'Living Room', x: 4.6, z: 2.5, width: 0.4, depth: 1.6, height: 0.5, color: [0.15, 0.12, 0.1] },
-  { name: 'rug', room: 'Living Room', x: 1.5, z: 2.5, width: 2.5, depth: 1.8, height: 0.02, color: [0.45, 0.32, 0.22] },
+  // ===== NW Bedroom =====
+  { name: 'bed (NW)',         room: 'NW Bedroom', x: 1.2, z: 4.0, width: 1.6, depth: 2.0, height: 0.55, color: [0.78, 0.71, 0.60] },
+  { name: 'nightstand (NW)',  room: 'NW Bedroom', x: 0.4, z: 5.4, width: 0.4, depth: 0.4, height: 0.55, color: [0.35, 0.22, 0.14] },
+  { name: 'wardrobe (NW)',    room: 'NW Bedroom', x: 2.05,z: 4.5, width: 0.55, depth: 1.8, height: 2.4, color: [0.30, 0.18, 0.11] },
 
-  // Kitchen
-  { name: 'counter (south)', room: 'Kitchen', x: 2.5, z: 5.4, width: 4.5, depth: 0.6, height: 0.9, color: [0.85, 0.78, 0.68] },
-  { name: 'counter (west)', room: 'Kitchen', x: 0.4, z: 7.0, width: 0.6, depth: 3, height: 0.9, color: [0.85, 0.78, 0.68] },
-  { name: 'fridge', room: 'Kitchen', x: 4.5, z: 8.5, width: 0.7, depth: 0.7, height: 1.8, color: [0.92, 0.92, 0.92] },
-  { name: 'dining table', room: 'Kitchen', x: 2.5, z: 7.5, width: 1.5, depth: 0.9, height: 0.75, color: [0.4, 0.26, 0.16] },
+  // ===== Lobby =====
+  { name: 'console',          room: 'Lobby',      x: 3.4, z: 1.85, width: 1.0, depth: 0.3, height: 0.85, color: [0.42, 0.27, 0.18] },
 
-  // Bedroom (second)
-  { name: 'bed (second)', room: 'Bedroom', x: 7, z: 1.5, width: 1.6, depth: 2.0, height: 0.55, color: [0.78, 0.71, 0.6] },
-  { name: 'nightstand', room: 'Bedroom', x: 8.4, z: 0.5, width: 0.5, depth: 0.4, height: 0.55, color: [0.35, 0.22, 0.14] },
-  { name: 'wardrobe', room: 'Bedroom', x: 5.4, z: 2.6, width: 0.6, depth: 1.8, height: 2.4, color: [0.32, 0.2, 0.13] },
+  // ===== Living =====
+  { name: 'sofa',             room: 'Living',     x: 5.5, z: 3.0, width: 2.6, depth: 0.95, height: 0.8, color: [0.55, 0.25, 0.18] },
+  { name: 'armchair',         room: 'Living',     x: 8.5, z: 3.4, width: 0.9, depth: 0.9, height: 0.85, color: [0.65, 0.45, 0.30] },
+  { name: 'coffee table',     room: 'Living',     x: 6.5, z: 4.2, width: 1.2, depth: 0.6, height: 0.45, color: [0.42, 0.27, 0.18] },
+  { name: 'tv unit',          room: 'Living',     x: 9.7, z: 5.0, width: 0.4, depth: 2.0, height: 0.55, color: [0.15, 0.12, 0.10] },
+  { name: 'rug',              room: 'Living',     x: 6.5, z: 3.8, width: 3.5, depth: 2.2, height: 0.02, color: [0.45, 0.32, 0.22] },
 
-  // Master Bedroom
-  { name: 'bed (master)', room: 'Master Bedroom', x: 10.5, z: 5.7, width: 2.0, depth: 1.6, height: 0.55, color: [0.65, 0.55, 0.45] },
-  { name: 'nightstand (m1)', room: 'Master Bedroom', x: 9.5, z: 5.2, width: 0.4, depth: 0.4, height: 0.55, color: [0.35, 0.22, 0.14] },
-  { name: 'nightstand (m2)', room: 'Master Bedroom', x: 11.5, z: 5.2, width: 0.4, depth: 0.4, height: 0.55, color: [0.35, 0.22, 0.14] },
-  { name: 'wardrobe (master)', room: 'Master Bedroom', x: 9.4, z: 6.7, width: 0.6, depth: 2.0, height: 2.4, color: [0.3, 0.18, 0.11] },
+  // ===== Dining =====
+  { name: 'dining table',     room: 'Dining',     x: 7.0, z: 1.2, width: 1.6, depth: 0.95, height: 0.75, color: [0.40, 0.26, 0.16] },
+  { name: 'dining chair 1',   room: 'Dining',     x: 6.2, z: 0.7, width: 0.45, depth: 0.45, height: 0.85, color: [0.35, 0.22, 0.14] },
+  { name: 'dining chair 2',   room: 'Dining',     x: 7.0, z: 0.7, width: 0.45, depth: 0.45, height: 0.85, color: [0.35, 0.22, 0.14] },
+  { name: 'dining chair 3',   room: 'Dining',     x: 7.8, z: 0.7, width: 0.45, depth: 0.45, height: 0.85, color: [0.35, 0.22, 0.14] },
 
-  // Hallway plant
-  { name: 'plant', room: 'Hallway', x: 6, z: 4.5, width: 0.5, depth: 0.5, height: 1.2, color: [0.25, 0.5, 0.25] },
+  // ===== Kitchen =====
+  { name: 'counter (north)',  room: 'Kitchen',    x: 4.4, z: 10.2, width: 3.9, depth: 0.6, height: 0.9, color: [0.85, 0.78, 0.68] },
+  { name: 'counter (west)',   room: 'Kitchen',    x: 2.8, z: 8.7,  width: 0.6, depth: 3.0, height: 0.9, color: [0.85, 0.78, 0.68] },
+  { name: 'fridge',           room: 'Kitchen',    x: 6.1, z: 9.8,  width: 0.7, depth: 0.7, height: 1.8, color: [0.92, 0.92, 0.92] },
+  { name: 'hob/oven',         room: 'Kitchen',    x: 5.0, z: 10.2, width: 0.7, depth: 0.6, height: 0.92, color: [0.20, 0.18, 0.18] },
+
+  // ===== NE Bedroom =====
+  { name: 'bed (NE)',         room: 'NE Bedroom', x: 12.5, z: 10.5, width: 1.8, depth: 2.0, height: 0.55, color: [0.78, 0.71, 0.60] },
+  { name: 'nightstand (NE)',  room: 'NE Bedroom', x: 13.6, z: 9.2,  width: 0.4, depth: 0.4, height: 0.55, color: [0.35, 0.22, 0.14] },
+  { name: 'wardrobe (NE)',    room: 'NE Bedroom', x: 10.3, z: 10.0, width: 0.6, depth: 1.6, height: 2.4, color: [0.30, 0.18, 0.11] },
+
+  // ===== Middle Bedroom =====
+  { name: 'bed (mid)',        room: 'Middle Bedroom', x: 12.5, z: 6.0, width: 1.8, depth: 2.0, height: 0.55, color: [0.68, 0.62, 0.50] },
+  { name: 'wardrobe (mid)',   room: 'Middle Bedroom', x: 10.3, z: 5.5, width: 0.6, depth: 1.8, height: 2.4, color: [0.30, 0.18, 0.11] },
+  { name: 'desk (mid)',       room: 'Middle Bedroom', x: 13.5, z: 4.5, width: 1.2, depth: 0.5, height: 0.75, color: [0.42, 0.27, 0.18] },
+
+  // ===== Master Bedroom =====
+  { name: 'bed (master)',     room: 'Master Bedroom', x: 12.5, z: 2.5, width: 2.0, depth: 1.7, height: 0.55, color: [0.65, 0.55, 0.45] },
+  { name: 'nightstand (m1)',  room: 'Master Bedroom', x: 11.3, z: 2.0, width: 0.4, depth: 0.4, height: 0.55, color: [0.35, 0.22, 0.14] },
+  { name: 'nightstand (m2)',  room: 'Master Bedroom', x: 13.7, z: 2.0, width: 0.4, depth: 0.4, height: 0.55, color: [0.35, 0.22, 0.14] },
+  { name: 'wardrobe (master)',room: 'Master Bedroom', x: 10.3, z: 1.5, width: 0.6, depth: 2.0, height: 2.4, color: [0.30, 0.18, 0.11] },
+
+  // ===== North Deck plant =====
+  { name: 'plant',            room: 'North Deck', x: 9.0, z: 11.3, width: 0.5, depth: 0.5, height: 1.4, color: [0.25, 0.50, 0.25] },
 ];
 
-// Spawn position for the player — just inside the entrance, facing into the flat.
+// Spawn just inside the front door, facing north into the flat.
 export const SPAWN = {
-  x: 10.75, // centred in the entrance gap (10..11.5)
-  z: 0.5,   // just inside
-  y: 1.7,   // eye height
-  rotY: 0,  // facing north (into the flat)
+  x: 3.6,
+  z: 0.5,
+  y: 1.7,
+  rotY: 0,
 };
