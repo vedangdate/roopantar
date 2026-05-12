@@ -1,0 +1,21 @@
+{
+  "name": "roopantar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Immersive first-person interior design with Gemini AI",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=roopantar --branch=main"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^7.50.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250410.0",
+    "typescript": "~5.6.0",
+    "vite": "^5.4.0"
+  }
+}

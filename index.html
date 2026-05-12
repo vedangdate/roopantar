@@ -4,62 +4,69 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Roopantar — रूपान्तर</title>
-  <meta name="description" content="An immersive interior design app — transform your space with a conversation." />
+  <meta name="description" content="An immersive first-person interior design experience powered by Gemini AI." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='70' text-anchor='middle' fill='%23d4a373'%3Eरू%3C/text%3E%3C/svg%3E" />
-  <style>
-    :root {
-      --bg: #1a1410;
-      --fg: #f4ede4;
-      --accent: #d4a373;
-      --muted: #8a7a6a;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
-      min-height: 100dvh;
-      display: grid;
-      place-items: center;
-      padding: 2rem;
-      text-align: center;
-      line-height: 1.6;
-    }
-    main { max-width: 36rem; }
-    .devanagari {
-      font-family: "Noto Sans Devanagari", "Sanskrit Text", serif;
-      font-size: clamp(4rem, 12vw, 7rem);
-      color: var(--accent);
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
-    }
-    h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 400;
-      letter-spacing: 0.04em;
-      margin-bottom: 1.5rem;
-    }
-    p { color: var(--muted); margin-bottom: 1rem; }
-    .tag {
-      display: inline-block;
-      margin-top: 2rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--muted);
-      border-radius: 999px;
-      font-size: 0.875rem;
-      color: var(--muted);
-    }
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-  </style>
+  <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
-  <main>
-    <div class="devanagari">रूपान्तर</div>
-    <h1>Roopantar</h1>
-    <p>Transformation. The act of giving a new form.</p>
-    <p>An immersive interior design experience — walk through your home, talk to AI, and watch the room transform.</p>
-    <span class="tag">Under construction · 2026</span>
-  </main>
+  <canvas id="renderCanvas" tabindex="1"></canvas>
+
+  <!-- Start overlay (shown before first click → pointer lock) -->
+  <div id="startOverlay" class="overlay">
+    <div class="overlay-card">
+      <div class="devanagari">रूपान्तर</div>
+      <h1>Roopantar</h1>
+      <p class="subtitle">Walk through your home. Talk to AI. Transform what you see.</p>
+      <div class="controls-hint">
+        <div><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> — move</div>
+        <div><kbd>Mouse</kbd> — look around</div>
+        <div><kbd>Shift</kbd> — sprint</div>
+        <div><kbd>Esc</kbd> — release mouse</div>
+        <div><kbd>T</kbd> — type to AI</div>
+        <div><kbd>M</kbd> — hold to speak</div>
+      </div>
+      <button id="startBtn" class="primary">Enter</button>
+      <p class="note">Best in Chrome/Edge. Click anywhere on the scene to recapture the mouse if it gets released.</p>
+    </div>
+  </div>
+
+  <!-- Pause overlay -->
+  <div id="pauseOverlay" class="overlay hidden">
+    <div class="overlay-card small">
+      <h2>Paused</h2>
+      <button id="resumeBtn" class="primary">Resume</button>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" class="hud hidden">
+    <div id="crosshair">·</div>
+    <div id="roomLabel" class="room-label"></div>
+  </div>
+
+  <!-- Chat panel -->
+  <div id="chatPanel" class="chat hidden">
+    <div id="chatLog" class="chat-log"></div>
+    <form id="chatForm" class="chat-form">
+      <button type="button" id="micBtn" title="Hold M or click to speak" class="icon-btn">🎙️</button>
+      <input id="chatInput" type="text" autocomplete="off" placeholder="Type or hold M to speak..." />
+      <button type="button" id="imagineBtn" title="Generate an image of your idea" class="icon-btn">✨</button>
+      <button type="submit" class="icon-btn">↩</button>
+    </form>
+  </div>
+
+  <!-- Imagined image overlay -->
+  <div id="imageOverlay" class="image-overlay hidden">
+    <div class="image-overlay-content">
+      <button id="closeImageBtn" class="close-btn">×</button>
+      <img id="imagineResult" alt="AI-generated room concept" />
+      <p id="imagineCaption" class="caption"></p>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
