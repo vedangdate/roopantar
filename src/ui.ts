@@ -112,8 +112,10 @@ export function setupUI(bundle: SceneBundle) {
       const r = await chat(text, { roomName: currentRoomName() });
       thinking.remove();
       addMsg('ai', r.text);
-      // Auto speak short responses.
-      if (r.text.length < 400) speak(r.text);
+      // Auto speak short responses via ElevenLabs.
+      if (r.text.length < 400) {
+        speak(r.text).catch((err) => showToast(`tts: ${err?.message ?? err}`));
+      }
       if (r.imagine) {
         showToast('Generating visual…');
         await doImagine(r.imagine);
@@ -140,16 +142,22 @@ export function setupUI(bundle: SceneBundle) {
   );
 
   let micActive = false;
-  function toggleMic() {
+  async function toggleMic() {
     if (!voice.supported) { showToast('Voice input not supported in this browser.'); return; }
     if (micActive) {
       voice.stop();
       micBtn.classList.remove('recording');
       micActive = false;
     } else {
-      voice.start();
       micBtn.classList.add('recording');
       micActive = true;
+      try {
+        await voice.start();
+      } catch (err: any) {
+        showToast(`mic: ${err?.message ?? err}`);
+        micBtn.classList.remove('recording');
+        micActive = false;
+      }
     }
   }
   micBtn.addEventListener('click', (e) => { e.preventDefault(); toggleMic(); });
