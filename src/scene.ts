@@ -82,21 +82,9 @@ export function createScene(canvas: HTMLCanvasElement): SceneBundle {
     c.rotation.x = Math.PI;
     c.material = ceilingMat;
   }
-  // South row (Lobby + Common Toilet + Master Bedroom): NOT including master deck
-  addCeiling(0, 0, 14.61, 1.42);    // Lobby + Common Toilet
-  addCeiling(10.47, 0, 14.61, 4.44); // Master Bedroom
-  // Central column (Dining + Living + Kitchen + Utility): x=4.83..8.64 (Living/Dining) and x=4.83..7.52 (Kitchen) and x=4.83..7.32 (Utility)
-  addCeiling(1.55, 1.42, 4.83, 5.41);   // NW Bedroom + NW Toilet
-  addCeiling(0,    1.42, 1.55, 3.81);   // NW Toilet
-  addCeiling(4.83, 1.42, 8.64, 10.39);  // Dining + Living
-  addCeiling(4.83, 10.39, 7.52, 13.82); // Kitchen
-  addCeiling(4.83, 13.82, 7.32, 15.01); // Utility
-  // Inner Lobby
-  addCeiling(8.64, 1.42, 10.47, 7.77);
-  // Middle Bedroom + NE Toilet + NE Bedroom
-  addCeiling(10.47, 4.44, 14.61, 7.77);  // Middle
-  addCeiling(8.64, 8.69, 10.47, 11.43);  // NE Toilet
-  addCeiling(10.47, 7.77, 14.61, 12.14); // NE Bedroom
+  // Master suite ceilings (deck = no ceiling, open sky):
+  addCeiling(0, 0,    2.59, 1.55);  // Master Toilet
+  addCeiling(0, 1.55, 4.44, 5.69);  // Master Bedroom
 
   // Railing material (deck exterior walls — short concrete/stone color)
   const railingMat = new StandardMaterial('railingMat', scene);
