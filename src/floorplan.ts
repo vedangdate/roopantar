@@ -233,7 +233,12 @@ export interface FurnitureItem {
   rotY?: number;
 }
 
-export const FURNITURE: FurnitureItem[] = [
+// All interior furniture stripped per user request — empty shell for now.
+// Will repopulate after layout is locked in.
+export const FURNITURE: FurnitureItem[] = [];
+
+// (preserved below — disabled by being unreachable)
+const _DISABLED_FURNITURE: FurnitureItem[] = [
   // ===== NW Toilet =====
   { name: 'commode (NW)',         room: 'NW Toilet', x: 0.3, z: 3.4, width: 0.4, depth: 0.65, height: 0.42, color: [0.96, 0.96, 0.96] },
   { name: 'cistern (NW)',         room: 'NW Toilet', x: 0.2, z: 3.4, width: 0.18, depth: 0.4, height: 0.85, color: [0.96, 0.96, 0.96] },
