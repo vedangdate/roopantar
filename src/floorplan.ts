@@ -195,9 +195,8 @@ export const WALLS: WallSeg[] = [
   // Utility at z=10.93..12.12 overlaps NE Toilet z=8.69..11.43 from z=10.93..11.43.
   // To avoid overlap, place Utility above NE Toilet: x=7.52..10.01, z=11.43..12.12 (only 0.69m N-S — too thin).
   // Simpler: skip Utility for v0; treat that area as part of Kitchen/Deck transition.
-  // North Deck french-window slider (wide gap x=7.7..9.5)
-  { x1: 7.52, z1: 12.12, x2: 7.7,  z2: 12.12 },
-  { x1: 9.5,  z1: 12.12, x2: 10.01, z2: 12.12 },
+  // Kitchen north wall = solid (plain window only; slider is on Living's north wall instead)
+  { x1: 7.52, z1: 12.12, x2: 10.01, z2: 12.12 },
   { x1: 10.01,z1: 12.12, x2: 12.12, z2: 12.12 },
   // East wall of utility/kitchen-deck transition:
   { x1: 10.01, z1: 11.43, x2: 10.01, z2: 12.12 },
@@ -359,6 +358,9 @@ export const FURNITURE: FurnitureItem[] = [
   { name: 'window NE-deck-north-2', room: 'NE Deck', x: 13.5, z: 13.45, width: 1.4, depth: 0.06, height: 1.4, y: 0.8, color: [0.62, 0.82, 0.95] },
   { name: 'window N-deck-1',  room: 'North Deck', x: 6.5, z: 14.47, width: 1.6, depth: 0.06, height: 1.4, y: 0.8, color: [0.62, 0.82, 0.95] },
   { name: 'window N-deck-2',  room: 'North Deck', x: 9.5, z: 14.47, width: 1.6, depth: 0.06, height: 1.4, y: 0.8, color: [0.62, 0.82, 0.95] },
+  // Kitchen plain windows (north wall — confirmed plain window, no slider)
+  { name: 'window Kitchen-1', room: 'Kitchen', x: 5.6, z: 12.16, width: 1.4, depth: 0.06, height: 1.2, y: 1.0, color: [0.62, 0.82, 0.95] },
+  { name: 'window Kitchen-2', room: 'Kitchen', x: 7.0, z: 12.16, width: 1.4, depth: 0.06, height: 1.2, y: 1.0, color: [0.62, 0.82, 0.95] },
 
   // West wall windows for NW Bedroom (subtle — looking west toward 803 boundary)
   // Skip — the west wall is a party wall with flat 803, not exterior.
@@ -366,11 +368,7 @@ export const FURNITURE: FurnitureItem[] = [
   // Living room windows (facing north onto kitchen+deck) — gives the living a "see through" feel
   { name: 'window Living-north', room: 'Living', x: 6.5, z: 10.34, width: 1.5, depth: 0.06, height: 1.0, y: 1.0, color: [0.62, 0.82, 0.95] },
 
-  // ===== Sliding French Doors (3) — distinct teal-blue glass color =====
-  // Frame (dark) + glass (teal-blue). Two stacked thin boxes per slider.
-  // North Deck slider — gap x=7.7..9.5, on wall z=12.12
-  { name: 'slider N-frame',  room: 'Kitchen',     x: 8.6,  z: 12.12, width: 1.8, depth: 0.08, height: 2.4, color: [0.18, 0.18, 0.20] },
-  { name: 'slider N-glass',  room: 'Kitchen',     x: 8.6,  z: 12.12, width: 1.75, depth: 0.04, height: 2.1, y: 0.15, color: [0.30, 0.65, 0.75] },
+  // ===== Sliding French Doors (kept: NE + Master; Living slider deferred until layout restructure) =====
   // NE Deck slider — gap x=11.5..13.3, on wall z=12.14
   { name: 'slider NE-frame', room: 'NE Bedroom',  x: 12.4, z: 12.14, width: 1.8, depth: 0.08, height: 2.4, color: [0.18, 0.18, 0.20] },
   { name: 'slider NE-glass', room: 'NE Bedroom',  x: 12.4, z: 12.14, width: 1.75, depth: 0.04, height: 2.1, y: 0.15, color: [0.30, 0.65, 0.75] },
