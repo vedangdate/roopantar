@@ -20,6 +20,7 @@ import {
   FURNITURE,
   SPAWN,
   ROOMS,
+  ROOM_RECTS,
 } from './floorplan';
 
 export interface SceneBundle {
@@ -77,14 +78,17 @@ export function createScene(canvas: HTMLCanvasElement): SceneBundle {
   function addCeiling(x1: number, z1: number, x2: number, z2: number) {
     const w = x2 - x1;
     const d = z2 - z1;
+    if (w <= 0 || d <= 0) return;
     const c = MeshBuilder.CreateGround(`ceil-${x1}-${z1}`, { width: w, height: d }, scene);
     c.position.set((x1 + x2) / 2, CEILING_HEIGHT, (z1 + z2) / 2);
     c.rotation.x = Math.PI;
     c.material = ceilingMat;
   }
-  // Master suite ceilings (deck = no ceiling, open sky):
-  addCeiling(0, 0,    2.59, 1.55);  // Master Toilet
-  addCeiling(0, 1.55, 4.44, 5.69);  // Master Bedroom
+  // Ceiling per indoor room (decks = no ceiling = open sky).
+  for (const r of ROOM_RECTS) {
+    if (r.purpose === 'deck') continue;
+    addCeiling(r.x1, r.z1, r.x2, r.z2);
+  }
 
   // Railing material (deck exterior walls — short concrete/stone color)
   const railingMat = new StandardMaterial('railingMat', scene);
