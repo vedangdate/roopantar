@@ -1,1 +1,1 @@
-{"root":["./src/ai.ts","./src/floorplan.ts","./src/main.ts","./src/scene.ts","./src/ui.ts","./src/voice.ts","./functions/api/chat.ts","./functions/api/imagine.ts","./functions/api/stt.ts","./functions/api/tts.ts"],"version":"5.6.3"}
+{"root":["./src/ai.ts","./src/floorplan.ts","./src/main.ts","./src/scene.ts","./src/ui.ts","./src/voice.ts","./src/wireframe.ts","./functions/api/chat.ts","./functions/api/imagine.ts","./functions/api/stt.ts","./functions/api/tts.ts"],"version":"5.6.3"}

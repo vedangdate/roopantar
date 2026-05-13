@@ -67,6 +67,16 @@
   <!-- Toast -->
   <div id="toast" class="toast hidden"></div>
 
+  <!-- Wireframe (top-down floorplan overlay) - press P to toggle -->
+  <div id="wireframePanel" class="wireframe-panel">
+    <div class="wireframe-header">
+      <span class="wireframe-title">Top-down (toggle: P)</span>
+      <button id="closeWireframe" class="icon-btn">×</button>
+    </div>
+    <svg id="wireframeSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="wireframe-legend">player = blue dot. cyan = railing. dashed = doors/sliders.</div>
+  </div>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

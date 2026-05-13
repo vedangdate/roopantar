@@ -1,95 +1,78 @@
 // Floor plan — scoped to flat 804's SE Master Bedroom suite.
 // User uses Roopantar as a design tool for THIS room.
 //
-// 3 spaces (matching photo):
-//   - Master Bedroom: 14'7" × 13'7" (4.44 × 4.14 m)
-//   - Master Toilet (south of bedroom, en-suite): 5'1" × 8'6" laid as 8'6" E-W × 5'1" N-S
-//     (2.59 × 1.55 m). Sits at SW of the suite, south of bedroom's west half.
-//   - Master Deck (east of bedroom, private): 4'9" × 14'3" (1.45 × 4.34 m).
-//     Tall narrow strip — extends slightly north + south past bedroom N-S.
+// Per photo (re-checked):
+//   - Master Bedroom: 14'7" × 13'7" (4.44 × 4.14 m), E-W × N-S
+//   - Master Toilet: 5'1" × 8'6" (1.55 × 2.59 m) — west of bedroom,
+//     south half (SW alcove of suite). Toilet's N-S < bedroom's N-S so
+//     toilet only occupies south portion of west side.
+//   - Master Deck: 4'9" × 14'3" (1.45 × 4.34 m) — east of bedroom,
+//     N-S slightly taller than bedroom (extends 0.20 m north).
 //
-// Coordinates: metres. Origin SW corner. X = east, Z = north.
+// Coordinates: metres. Origin at SW corner of suite. X = east, Z = north.
 
-// Total suite footprint:
-//   Bedroom + deck E-W = 4.44 + 1.45 = 5.89 m
-//   Bedroom N-S = 4.14, but deck N-S = 4.34 (extends 0.10 north + 0.10 south)
-//   Toilet south of bedroom adds 1.55 N-S
-// Total: 5.89 E-W × (1.55 + 4.14 + 0.10) = 5.89 × 5.79 m
-// Round up for margin.
-export const FLAT_WIDTH = 6.0;
-export const FLAT_DEPTH = 6.0;
+export const FLAT_WIDTH = 7.44;  // toilet (1.55) + bedroom (4.44) + deck (1.45)
+export const FLAT_DEPTH = 4.34;  // deck N-S
 export const CEILING_HEIGHT = 3.0;
 export const WALL_THICKNESS = 0.15;
 
 export interface WallSeg {
   x1: number; z1: number;
   x2: number; z2: number;
-  /** If true, render at railing height (1.0m) instead of full ceiling height. Deck exteriors. */
+  /** If true, render at 1.0 m railing height (deck exteriors). */
   railing?: boolean;
 }
 
-// Room boundaries:
-//   Master Toilet: x=0..2.59, z=0..1.55
-//   Master Bedroom: x=0..4.44, z=1.55..5.69
-//   Master Deck: x=4.44..5.89, z=1.45..5.79
-//   (deck N-S=4.34 — extends 0.10 north of bedroom + 0.10 south of bedroom)
+// Room layout:
+//   Master Toilet:  x=0..1.55,    z=0..2.59 (SW alcove)
+//   Master Bedroom: x=1.55..5.99, z=0..4.14
+//   Master Deck:    x=5.99..7.44, z=0..4.34 (extends 0.20 north of bedroom)
+//   Dead corner:    x=0..1.55,    z=2.59..4.14 (no room here — exterior on north + west)
 
 export const WALLS: WallSeg[] = [
   // ====== Exterior perimeter ======
-  // South wall:
-  //   - x=0..2.59: Master Toilet south (solid exterior)
-  //   - x=2.59..4.44: south of bedroom (solid; nothing south of bedroom east half — exterior)
-  //   - x=4.44..5.89: Master Deck south face, slightly south of bedroom (railing)
-  //     Deck south at z=1.45 (deck extends 0.10 south of bedroom which starts at z=1.55).
-  //     But for perimeter at z=0 here, there's a gap. Treat south wall as stepped:
-  { x1: 0,    z1: 0, x2: 4.44, z2: 0 },                    // toilet south + bedroom south-base
-  // Step north to deck's south wall:
-  { x1: 4.44, z1: 0, x2: 4.44, z2: 1.45 },                 // wall closing the corner south-of-deck
-  { x1: 4.44, z1: 1.45, x2: 5.89, z2: 1.45, railing: true }, // deck south (railing)
 
-  // East wall (deck east, full N-S of deck, railing):
-  { x1: 5.89, z1: 1.45, x2: 5.89, z2: 5.79, railing: true },
+  // South wall (solid: toilet south, bedroom south, deck south is railing)
+  { x1: 0,    z1: 0, x2: 5.99, z2: 0 },                       // toilet + bedroom south
+  { x1: 5.99, z1: 0, x2: 7.44, z2: 0, railing: true },        // deck south (railing)
+
+  // East wall (deck east, railing)
+  { x1: 7.44, z1: 0, x2: 7.44, z2: 4.34, railing: true },
 
   // North wall:
-  //   - deck north (railing)
-  { x1: 4.44, z1: 5.79, x2: 5.89, z2: 5.79, railing: true },
-  //   - step south back to bedroom north (deck N-S=4.34 extends 0.10 past bedroom north 5.69)
-  { x1: 4.44, z1: 5.69, x2: 4.44, z2: 5.79, railing: true },
-  //   - bedroom north (solid)
-  { x1: 0, z1: 5.69, x2: 4.44, z2: 5.69 },
+  //   - Deck north (railing): x=5.99..7.44, z=4.34
+  { x1: 5.99, z1: 4.34, x2: 7.44, z2: 4.34, railing: true },
+  //   - Step south from deck to bedroom (deck N-S=4.34, bedroom N-S=4.14)
+  { x1: 5.99, z1: 4.14, x2: 5.99, z2: 4.34, railing: true },
+  //   - Bedroom north (solid)
+  { x1: 1.55, z1: 4.14, x2: 5.99, z2: 4.14 },
+  //   - North wall of dead corner (toilet north zone exterior)
+  { x1: 0,    z1: 4.14, x2: 1.55, z2: 4.14 },
 
-  // West wall (toilet + bedroom — solid)
-  { x1: 0, z1: 0, x2: 0, z2: 5.69 },
+  // West wall:
+  //   - Toilet west (solid exterior)
+  { x1: 0, z1: 0, x2: 0, z2: 2.59 },
+  //   - Dead corner west (exterior, solid)
+  { x1: 0, z1: 2.59, x2: 0, z2: 4.14 },
 
   // ====== Internal walls ======
 
-  // ---- Master Toilet (x=0..2.59, z=0..1.55) ----
-  // North wall (separates toilet from bedroom — door gap x=0.8..1.5)
-  { x1: 0,    z1: 1.55, x2: 0.8,  z2: 1.55 },
-  { x1: 1.5,  z1: 1.55, x2: 2.59, z2: 1.55 },
-  // East wall of toilet (separates from bedroom's east half area at south)
-  { x1: 2.59, z1: 0,    x2: 2.59, z2: 1.55 },
+  // ---- Master Toilet (x=0..1.55, z=0..2.59) ----
+  // North wall (separates toilet from dead corner): solid
+  { x1: 0, z1: 2.59, x2: 1.55, z2: 2.59 },
+  // East wall = bedroom west wall (south portion). Door gap z=1.6..2.4.
+  { x1: 1.55, z1: 0,   x2: 1.55, z2: 1.6 },
+  { x1: 1.55, z1: 2.4, x2: 1.55, z2: 2.59 },
+
+  // ---- Master Bedroom west wall (north portion, x=1.55, z=2.59..4.14) ----
+  // Solid wall separating bedroom from dead corner (no door).
+  { x1: 1.55, z1: 2.59, x2: 1.55, z2: 4.14 },
 
   // ---- Master Bedroom east wall (separates from Master Deck) ----
-  // Slider gap z=2.6..4.6 (french-window slider, ~2m wide)
-  { x1: 4.44, z1: 1.55, x2: 4.44, z2: 2.6 },
-  { x1: 4.44, z1: 4.6,  x2: 4.44, z2: 5.69 },
-
-  // ---- Bedroom entry door (on west wall — would be from rest of flat) ----
-  // For this scoped scene, simulate "entry from rest of flat" via door gap on bedroom west wall.
-  // Already west wall solid (0..5.69). Cut a door gap z=2.5..3.5:
-  // Re-do west wall split:
-  // (Note: west wall is part of perimeter. Splitting it.)
+  // Slider gap z=1.5..3.5 (french-window slider, 2 m wide)
+  { x1: 5.99, z1: 0,   x2: 5.99, z2: 1.5 },
+  { x1: 5.99, z1: 3.5, x2: 5.99, z2: 4.14 },
 ];
-
-// Re-write west wall to have a door gap (entry from "outside the scope" — central building hallway placeholder):
-// Remove the single segment "{ x1: 0, z1: 0, x2: 0, z2: 5.69 }" — replace with two segments:
-//   z=0..2.5 + z=3.5..5.69
-// Inline edit:
-WALLS.splice(WALLS.findIndex(w => w.x1 === 0 && w.z1 === 0 && w.x2 === 0 && w.z2 === 5.69), 1,
-  { x1: 0, z1: 0, x2: 0, z2: 2.5 },
-  { x1: 0, z1: 3.5, x2: 0, z2: 5.69 },
-);
 
 export interface RoomLabel {
   name: string;
@@ -97,9 +80,9 @@ export interface RoomLabel {
 }
 
 export const ROOMS: RoomLabel[] = [
-  { name: 'Master Toilet',  cx: 1.30, cz: 0.78 },
-  { name: 'Master Bedroom', cx: 2.22, cz: 3.62 },
-  { name: 'Master Deck',    cx: 5.16, cz: 3.62 },
+  { name: 'Master Toilet',  cx: 0.78, cz: 1.30 },
+  { name: 'Master Bedroom', cx: 3.77, cz: 2.07 },
+  { name: 'Master Deck',    cx: 6.72, cz: 2.17 },
 ];
 
 export interface FurnitureItem {
@@ -112,13 +95,13 @@ export interface FurnitureItem {
   rotY?: number;
 }
 
-// Empty — user designs from scratch via AI ("imagine a sofa here", etc.)
+// Empty — user designs from scratch via AI ("imagine a king bed against the north wall", etc.)
 export const FURNITURE: FurnitureItem[] = [];
 
-// Spawn just inside entry door (west wall of bedroom), facing east into the room.
+// Spawn center of Master Bedroom, facing east (toward deck slider).
 export const SPAWN = {
-  x: 0.6,
-  z: 3.0,
+  x: 3.5,
+  z: 2.0,
   y: 1.7,
-  rotY: -Math.PI / 2,  // face east (into the room, deck visible far end)
+  rotY: -Math.PI / 2,
 };
