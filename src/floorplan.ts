@@ -136,9 +136,9 @@ export const WALLS: WallSeg[] = [
   { x1: 10.47, z1: 2.6,  x2: 10.47, z2: 4.44 },
   // North wall (separates Master from Middle):
   { x1: 10.47, z1: 4.44, x2: 14.61, z2: 4.44 },
-  // West wall of Master Deck (door from Master into Master Deck): door z=2.8..3.6
-  { x1: 14.61, z1: 0,    x2: 14.61, z2: 2.8 },
-  { x1: 14.61, z1: 3.6,  x2: 14.61, z2: 4.34 },
+  // Master Deck french-window slider (wide gap z=2.0..3.8)
+  { x1: 14.61, z1: 0,    x2: 14.61, z2: 2.0 },
+  { x1: 14.61, z1: 3.8,  x2: 14.61, z2: 4.34 },
 
   // ---- Master Toilet alcove (1.55 × 2.59, inside Master at x=10.47..12.02, z=1.85..4.44) ----
   { x1: 10.47, z1: 1.85, x2: 12.02, z2: 1.85 },               // south wall
@@ -195,10 +195,10 @@ export const WALLS: WallSeg[] = [
   // Utility at z=10.93..12.12 overlaps NE Toilet z=8.69..11.43 from z=10.93..11.43.
   // To avoid overlap, place Utility above NE Toilet: x=7.52..10.01, z=11.43..12.12 (only 0.69m N-S — too thin).
   // Simpler: skip Utility for v0; treat that area as part of Kitchen/Deck transition.
-  // Door from Kitchen area to North Deck: north wall gap x=8.0..9.0
-  { x1: 7.52, z1: 12.12, x2: 8.0,  z2: 12.12 },
-  { x1: 9.0,  z1: 12.12, x2: 10.01, z2: 12.12 },
-  { x1: 10.01,z1: 12.12, x2: 12.12, z2: 12.12 },             // east of utility, west of NE bedroom
+  // North Deck french-window slider (wide gap x=7.7..9.5)
+  { x1: 7.52, z1: 12.12, x2: 7.7,  z2: 12.12 },
+  { x1: 9.5,  z1: 12.12, x2: 10.01, z2: 12.12 },
+  { x1: 10.01,z1: 12.12, x2: 12.12, z2: 12.12 },
   // East wall of utility/kitchen-deck transition:
   { x1: 10.01, z1: 11.43, x2: 10.01, z2: 12.12 },
   { x1: 12.12, z1: 12.12, x2: 12.12, z2: 14.51 },             // east wall of North Deck
@@ -209,8 +209,9 @@ export const WALLS: WallSeg[] = [
   // West wall: at x=4.83 (already drawn as part of perimeter).
   // East wall: at x=12.12 (drawn above), separates from NE Bedroom protrusion area.
 
-  // ---- NE Bedroom north wall (separates from NE Deck) ----
-  { x1: 10.47, z1: 12.14, x2: 14.61, z2: 12.14 },
+  // ---- NE Bedroom north wall (separates from NE Deck) — sliding door gap x=11.5..13.3 ----
+  { x1: 10.47, z1: 12.14, x2: 11.5, z2: 12.14 },
+  { x1: 13.3,  z1: 12.14, x2: 14.61, z2: 12.14 },
 ];
 
 export interface RoomLabel {
@@ -364,6 +365,18 @@ export const FURNITURE: FurnitureItem[] = [
 
   // Living room windows (facing north onto kitchen+deck) — gives the living a "see through" feel
   { name: 'window Living-north', room: 'Living', x: 6.5, z: 10.34, width: 1.5, depth: 0.06, height: 1.0, y: 1.0, color: [0.62, 0.82, 0.95] },
+
+  // ===== Sliding French Doors (3) — distinct teal-blue glass color =====
+  // Frame (dark) + glass (teal-blue). Two stacked thin boxes per slider.
+  // North Deck slider — gap x=7.7..9.5, on wall z=12.12
+  { name: 'slider N-frame',  room: 'Kitchen',     x: 8.6,  z: 12.12, width: 1.8, depth: 0.08, height: 2.4, color: [0.18, 0.18, 0.20] },
+  { name: 'slider N-glass',  room: 'Kitchen',     x: 8.6,  z: 12.12, width: 1.75, depth: 0.04, height: 2.1, y: 0.15, color: [0.30, 0.65, 0.75] },
+  // NE Deck slider — gap x=11.5..13.3, on wall z=12.14
+  { name: 'slider NE-frame', room: 'NE Bedroom',  x: 12.4, z: 12.14, width: 1.8, depth: 0.08, height: 2.4, color: [0.18, 0.18, 0.20] },
+  { name: 'slider NE-glass', room: 'NE Bedroom',  x: 12.4, z: 12.14, width: 1.75, depth: 0.04, height: 2.1, y: 0.15, color: [0.30, 0.65, 0.75] },
+  // Master Deck slider — gap z=2.0..3.8, on wall x=14.61
+  { name: 'slider M-frame',  room: 'Master Bedroom', x: 14.61, z: 2.9, width: 0.08, depth: 1.8, height: 2.4, color: [0.18, 0.18, 0.20] },
+  { name: 'slider M-glass',  room: 'Master Bedroom', x: 14.61, z: 2.9, width: 0.04, depth: 1.75, height: 2.1, y: 0.15, color: [0.30, 0.65, 0.75] },
 ];
 
 // Spawn just inside the front door (front door is on the WEST wall of the
