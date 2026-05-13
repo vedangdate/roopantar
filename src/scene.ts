@@ -33,12 +33,17 @@ export interface SceneBundle {
   currentRoomName: () => string | null;
 }
 
+// 8th floor of building → flat sits at y=0..3 (interior), exterior ground at y=-24
+const GROUND_Y = -24;
+const RAILING_HEIGHT = 1.0;
+
 export function createScene(canvas: HTMLCanvasElement): SceneBundle {
   const engine = new Engine(canvas, true, { stencil: true, preserveDrawingBuffer: true }, true);
   const scene = new Scene(engine);
-  scene.clearColor = new Color3(0.08, 0.06, 0.05).toColor4(1);
+  // Sky-blue clearColor (will be visible past railings on decks)
+  scene.clearColor = new Color3(0.62, 0.78, 0.92).toColor4(1);
   scene.collisionsEnabled = true;
-  scene.gravity = new Vector3(0, -9.81 / 60, 0); // gentle gravity per-frame
+  scene.gravity = new Vector3(0, -9.81 / 60, 0);
 
   // Materials
   const wallMat = new StandardMaterial('wallMat', scene);
@@ -64,19 +69,41 @@ export function createScene(canvas: HTMLCanvasElement): SceneBundle {
   floor.material = floorMat;
   floor.checkCollisions = true;
 
-  // Ceiling (so the room doesn't feel infinite)
-  const ceiling = MeshBuilder.CreateGround(
-    'ceiling',
-    { width: FLAT_WIDTH, height: FLAT_DEPTH },
-    scene,
-  );
-  ceiling.position.x = FLAT_WIDTH / 2;
-  ceiling.position.y = CEILING_HEIGHT;
-  ceiling.position.z = FLAT_DEPTH / 2;
-  ceiling.rotation.x = Math.PI; // face downward
-  ceiling.material = ceilingMat;
+  // Ceiling — render only over non-deck indoor zones (decks need sky visible).
+  // Indoor zones:
+  //   A. South strip (Lobby + Common Toilet + Master Bedroom): x=0..14.61, z=0..4.44
+  //   B. Central+west indoor (NW Toilet/Bedroom + Dining + Living + Kitchen + Utility + Inner Lobby + Middle/NE bedrooms): x=1.55..14.61, z=1.42..15.01 minus deck zones
+  // Simpler: render ceiling over a few large rectangles covering rooms, leaving deck zones open.
+  function addCeiling(x1: number, z1: number, x2: number, z2: number) {
+    const w = x2 - x1;
+    const d = z2 - z1;
+    const c = MeshBuilder.CreateGround(`ceil-${x1}-${z1}`, { width: w, height: d }, scene);
+    c.position.set((x1 + x2) / 2, CEILING_HEIGHT, (z1 + z2) / 2);
+    c.rotation.x = Math.PI;
+    c.material = ceilingMat;
+  }
+  // South row (Lobby + Common Toilet + Master Bedroom): NOT including master deck
+  addCeiling(0, 0, 14.61, 1.42);    // Lobby + Common Toilet
+  addCeiling(10.47, 0, 14.61, 4.44); // Master Bedroom
+  // Central column (Dining + Living + Kitchen + Utility): x=4.83..8.64 (Living/Dining) and x=4.83..7.52 (Kitchen) and x=4.83..7.32 (Utility)
+  addCeiling(1.55, 1.42, 4.83, 5.41);   // NW Bedroom + NW Toilet
+  addCeiling(0,    1.42, 1.55, 3.81);   // NW Toilet
+  addCeiling(4.83, 1.42, 8.64, 10.39);  // Dining + Living
+  addCeiling(4.83, 10.39, 7.52, 13.82); // Kitchen
+  addCeiling(4.83, 13.82, 7.32, 15.01); // Utility
+  // Inner Lobby
+  addCeiling(8.64, 1.42, 10.47, 7.77);
+  // Middle Bedroom + NE Toilet + NE Bedroom
+  addCeiling(10.47, 4.44, 14.61, 7.77);  // Middle
+  addCeiling(8.64, 8.69, 10.47, 11.43);  // NE Toilet
+  addCeiling(10.47, 7.77, 14.61, 12.14); // NE Bedroom
 
-  // Walls
+  // Railing material (deck exterior walls — short concrete/stone color)
+  const railingMat = new StandardMaterial('railingMat', scene);
+  railingMat.diffuseColor = new Color3(0.78, 0.74, 0.68);
+  railingMat.specularColor = new Color3(0.05, 0.05, 0.05);
+
+  // Walls — full-height for interior, low railing height for deck exteriors
   WALLS.forEach((w, i) => {
     const dx = w.x2 - w.x1;
     const dz = w.z2 - w.z1;
@@ -85,14 +112,17 @@ export function createScene(canvas: HTMLCanvasElement): SceneBundle {
     const cz = (w.z1 + w.z2) / 2;
     const angle = Math.atan2(dz, dx);
 
+    const height = w.railing ? RAILING_HEIGHT : CEILING_HEIGHT;
+    const mat = w.railing ? railingMat : wallMat;
+
     const mesh = MeshBuilder.CreateBox(
       `wall-${i}`,
-      { width: length, height: CEILING_HEIGHT, depth: WALL_THICKNESS },
+      { width: length, height: height, depth: WALL_THICKNESS },
       scene,
     );
-    mesh.position.set(cx, CEILING_HEIGHT / 2, cz);
+    mesh.position.set(cx, height / 2, cz);
     mesh.rotation.y = -angle;
-    mesh.material = wallMat;
+    mesh.material = mat;
     mesh.checkCollisions = true;
   });
 
@@ -115,15 +145,116 @@ export function createScene(canvas: HTMLCanvasElement): SceneBundle {
     mesh.metadata = { furniture: true, name: f.name, room: f.room };
   });
 
-  // Lighting — soft ambient + a directional from above-front for shading.
+  // ============================================================
+  //   OUTSIDE WORLD — Erandwane (Pune), 8th floor view
+  // ============================================================
+  // Approximate compass mapping in flat coords:
+  //   -X (west) = Vetal Tekdi (hill) direction, greenery
+  //   +X (east) = denser city / Erandwane main road
+  //   -Z (south) = Deccan / Karve Road dense low-rise
+  //   +Z (north) = Kothrud direction, more buildings + some hills
+  //
+  // The interior floor sits at y=0; exterior ground at y=-24 (8 floors below).
+
+  // Ground plane (large, far below window level)
+  const groundMat = new StandardMaterial('groundMat', scene);
+  groundMat.diffuseColor = new Color3(0.45, 0.42, 0.35); // dusty Pune ground
+  groundMat.specularColor = new Color3(0, 0, 0);
+  const ground = MeshBuilder.CreateGround('outsideGround', { width: 600, height: 600 }, scene);
+  ground.position.set(FLAT_WIDTH / 2, GROUND_Y, FLAT_DEPTH / 2);
+  ground.material = groundMat;
+
+  // Deterministic pseudo-random helper (so scene is stable across reloads)
+  let seed = 1337;
+  const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+
+  // Scattered low+mid-rise buildings around the flat (Erandwane is mostly
+  // 3-7 storey residential, with some 12-15 storey newer towers).
+  const flatCx = FLAT_WIDTH / 2;
+  const flatCz = FLAT_DEPTH / 2;
+  for (let i = 0; i < 80; i++) {
+    const angle = rand() * Math.PI * 2;
+    // Push buildings further west (Vetal Tekdi side) less dense, east+south denser
+    const isWest = Math.cos(angle) < -0.5;
+    const distMin = isWest ? 80 : 30;
+    const distMax = isWest ? 200 : 160;
+    const dist = distMin + rand() * (distMax - distMin);
+    const bx = flatCx + Math.cos(angle) * dist;
+    const bz = flatCz + Math.sin(angle) * dist;
+    const bw = 6 + rand() * 14;
+    const bd = 6 + rand() * 14;
+    // Most buildings shorter than flat (3-6 floors); some taller (12+)
+    const isTall = rand() < 0.2;
+    const bh = isTall ? 18 + rand() * 25 : 9 + rand() * 12;
+
+    const bldg = MeshBuilder.CreateBox(`bldg-${i}`, { width: bw, height: bh, depth: bd }, scene);
+    bldg.position.set(bx, GROUND_Y + bh / 2, bz);
+    const m = new StandardMaterial(`bldgMat-${i}`, scene);
+    // Cream/beige/dusty-pink/grey palette typical of Pune buildings
+    const palette = [
+      new Color3(0.82, 0.74, 0.62), // cream
+      new Color3(0.75, 0.65, 0.55), // beige
+      new Color3(0.68, 0.55, 0.48), // dusty pink
+      new Color3(0.62, 0.62, 0.60), // grey
+      new Color3(0.86, 0.78, 0.66), // light cream
+    ];
+    m.diffuseColor = palette[Math.floor(rand() * palette.length)];
+    m.specularColor = new Color3(0.02, 0.02, 0.02);
+    bldg.material = m;
+  }
+
+  // Trees (Erandwane has good tree cover — neem, gulmohar, peepal)
+  for (let i = 0; i < 60; i++) {
+    const angle = rand() * Math.PI * 2;
+    const dist = 18 + rand() * 120;
+    const tx = flatCx + Math.cos(angle) * dist;
+    const tz = flatCz + Math.sin(angle) * dist;
+    const th = 8 + rand() * 6;
+    // Trunk
+    const trunk = MeshBuilder.CreateCylinder(`trunk-${i}`, { diameter: 0.5, height: th * 0.4 }, scene);
+    trunk.position.set(tx, GROUND_Y + th * 0.2, tz);
+    const trunkMat = new StandardMaterial(`trunkMat-${i}`, scene);
+    trunkMat.diffuseColor = new Color3(0.32, 0.22, 0.14);
+    trunkMat.specularColor = new Color3(0, 0, 0);
+    trunk.material = trunkMat;
+    // Canopy (random green)
+    const canopy = MeshBuilder.CreateSphere(`canopy-${i}`, { diameter: th * 0.75, segments: 6 }, scene);
+    canopy.position.set(tx, GROUND_Y + th * 0.6, tz);
+    const canopyMat = new StandardMaterial(`canopyMat-${i}`, scene);
+    canopyMat.diffuseColor = new Color3(0.18 + rand() * 0.18, 0.38 + rand() * 0.2, 0.16 + rand() * 0.1);
+    canopyMat.specularColor = new Color3(0, 0, 0);
+    canopy.material = canopyMat;
+  }
+
+  // Vetal Tekdi (hill) — west of flat, large green silhouette
+  const hill = MeshBuilder.CreateSphere('vetalTekdi', { diameter: 260, segments: 16 }, scene);
+  hill.position.set(flatCx - 220, GROUND_Y + 10, flatCz - 30);
+  hill.scaling.y = 0.35; // flatten into a hill
+  const hillMat = new StandardMaterial('hillMat', scene);
+  hillMat.diffuseColor = new Color3(0.28, 0.42, 0.25);
+  hillMat.specularColor = new Color3(0, 0, 0);
+  hill.material = hillMat;
+
+  // Second smaller hill (north-west — could be Hanuman Tekdi area)
+  const hill2 = MeshBuilder.CreateSphere('hanumanTekdi', { diameter: 200, segments: 12 }, scene);
+  hill2.position.set(flatCx - 160, GROUND_Y + 6, flatCz + 180);
+  hill2.scaling.y = 0.3;
+  const hill2Mat = new StandardMaterial('hill2Mat', scene);
+  hill2Mat.diffuseColor = new Color3(0.32, 0.40, 0.24);
+  hill2Mat.specularColor = new Color3(0, 0, 0);
+  hill2.material = hill2Mat;
+
+  // ============================================================
+  //   Lighting
+  // ============================================================
   const ambient = new HemisphericLight('ambient', new Vector3(0, 1, 0), scene);
-  ambient.intensity = 0.7;
+  ambient.intensity = 0.85;
   ambient.diffuse = new Color3(1.0, 0.96, 0.88);
-  ambient.groundColor = new Color3(0.3, 0.25, 0.2);
+  ambient.groundColor = new Color3(0.45, 0.40, 0.32);
 
   const sun = new DirectionalLight('sun', new Vector3(-0.4, -1, 0.3), scene);
-  sun.intensity = 0.5;
-  sun.diffuse = new Color3(1.0, 0.95, 0.85);
+  sun.intensity = 0.7;
+  sun.diffuse = new Color3(1.0, 0.95, 0.80);
 
   // Camera = first-person UniversalCamera
   const camera = new UniversalCamera(
